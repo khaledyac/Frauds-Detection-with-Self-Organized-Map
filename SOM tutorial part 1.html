@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<HTML>
+ <HEAD>
+ <meta name="Author" content="Mat Buckland" />
+<meta name="Keywords" content="artificial intelligence neural network tutorial introduction ai" />
+<meta name="Description" content="neural network tutorial in plain english" />
+  
+<TITLE>SOM tutorial part 1</TITLE>
+
+  <META http-equiv="Content-Script-Type" content="text/javascript">
+
+  <SCRIPT TYPE="text/javascript" SRC="../../upgrade_flash/Dispatcher.js"></SCRIPT>
+
+ <style fprolloverstyle>A:hover {color: red; font-weight: bold}
+ </style>
+
+ </HEAD>
+
+ <BODY BGCOLOR="#000066" text="#C0C0C0" alink="#FFFFFF">
+
+<p class="MsoNormal" align="center">
+<a href="http://www.ai-junkie.com/">
+<img border="0" src="../../logo.jpg" width="469" height="78"></a></p>
+<hr>
+
+  <p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0"><b>
+  <font face="Arial" size="5" color="#FFFFCC">Kohonen's Self Organizing Feature 
+  Maps</font></b></p>
+
+  <p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">&nbsp;</p>
+
+  <p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">
+  &nbsp;</p>
+
+  <p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">
+  &nbsp;</p>
+
+  <p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">
+  &nbsp;</p>
+
+  <p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">
+  &nbsp;</p>
+
+  <div align="center">
+    <center>
+    <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse" bordercolor="#FFFFCC" width="60%" id="AutoNumber2" bgcolor="#00004F">
+      <tr>
+        <td width="100%" valign="top">
+
+  <p class="MsoNormal" align="left" style="margin-top:0; margin-bottom:0">
+  <font color="#FFFFCC">
+  <span style="font-family: Times New Roman; font-style: italic"><font size="4">
+  &quot;I cannot articulate enough to express my dislike to people who think that 
+  understanding spoils your experience... How would they know?&quot; </font></span></font></p>
+
+  <font color="#FFFFCC">
+
+  <p class="MsoNormal" align="left" style="margin-top:27; margin-bottom:0">
+  <span style="font-family: Times New Roman; "><font size="4">
+  Marvin Minsky</font></span></font></p>
+
+        </td>
+      </tr>
+    </table>
+    </center>
+</div>
+<p class="MsoNormal" align="left">&nbsp;</p>
+<p class="MsoNormal" align="left">&nbsp;</p>
+<p class="MsoNormal" align="left"><b>
+<font face="Arial" size="4" color="#FFFFCC">Introductory Note</font></b></p>
+<p class="MsoNormal" align="left"><font color="#FFFFFF"><font face="Arial">
+This tutorial is the first of two related to self organising feature maps. 
+Initially, this was just going to be one big comprehensive tutorial, but work 
+demands and other time constraints have forced me to divide it into two. 
+Nevertheless, part one should provide you with a pretty good introduction. 
+Certainly more than enough to whet your appetite anyway!&nbsp;&nbsp;&nbsp; </font>
+</p>
+<p class="MsoNormal" align="left"><font face="Arial">I will appreciate any 
+feedback you are willing to give - good or bad. My ears are always open for praise, 
+constructive criticism or suggestions for future tutorials.&nbsp; Please 
+drop by the forum after you've finished reading this tutorial and let me know 
+what you think... reader feedback is one of the things that makes maintaining a 
+site like this worthwhile. You can find the forum
+<a href="http://www.ai-junkie.com/board/">here</a>.</font></font></p>
+<p class="MsoNormal" align="left">&nbsp;</p>
+<p class="MsoNormal" align="left"><b>
+<font face="Arial" size="4" color="#FFFFCC">Overview</font></b></p>
+<p class="MsoNormal" align="left"><font face="Arial">Kohonen Self Organising 
+Feature Maps, or SOMs as I shall be referring to them from now on, are 
+fascinating beasts. They were invented by a man named <font color="#FFFFCC">Teuvo Kohonen</font>, a professor of 
+the Academy of Finland, and they provide a way of representing multidimensional 
+data in much lower dimensional spaces - usually one or two dimensions. This 
+process, of reducing the dimensionality of vectors, is essentially a data 
+compression technique known as <font color="#FFFFCC"> <i>vector quantisation</i></font>. In addition, the 
+Kohonen technique creates a network that stores information&nbsp;in such a way 
+that any topological relationships within the training set are maintained.</font></p>
+<p class="MsoNormal" align="left"><font face="Arial">A common example used to 
+help teach the principals behind SOMs is the 
+mapping of colours from their three dimensional components - red, green and blue, into two dimensions. Figure 1 shows an example of a SOM 
+trained to recognize the eight different colours shown on the right. The colours have been presented to the 
+network as 3D vectors - one dimension for each of the colour 
+components - and the network has learnt to represent them in the 2D space you can see. 
+Notice that in addition to clustering the colours into distinct regions, regions of 
+similar properties are usually found adjacent to each other. This feature of 
+Kohonen maps is often put to good 
+use as you will discover later.</font></p>
+<p class="MsoNormal" align="center">
+<img border="0" src="images/Figure1.jpg" width="500" height="300"></p>
+<p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">Figure 1</p>
+<p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">
+Screenshot of the demo program (left) and the colours it has classified (right).</p>
+<p class="MsoNormal" align="left"><font face="Arial">One of the most interesting 
+aspects of SOMs is that they learn to classify data <font color="#FFFFCC"> <i>without supervision</i></font>. 
+You may already be aware of supervised training techniques such as 
+backpropagation where the training data consists of vector pairs - an input 
+vector and a target vector. With this approach an input vector is presented to 
+the network (typically a multilayer feedforward network) and the output is 
+compared with the target vector. If they differ, the weights of the network 
+are altered slightly to reduce the error in the output. This is repeated many 
+times and with many sets of vector pairs until the network gives the desired 
+output. Training a SOM however, requires no target vector. A SOM learns to 
+classify the training data without any external supervision whatsoever. Neat 
+huh?</font></p>
+<p class="MsoNormal" align="left"><font face="Arial">Before I get on with the 
+nitty gritty, it's best for you to forget everything you may already know about 
+neural networks! If you try to think of SOMs in terms of&nbsp;neurons, 
+activation functions and feedforward/recurrent connections you're likely to 
+grow confused quickly. So dig out all that knowledge from your head and shove it 
+to one side before you read any further. Done that? Great, let's get on with the 
+tutorial then...</font></p>
+<p class="MsoNormal" align="left">&nbsp;</p>
+<div align="center">
+  <center>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#FFFFCC" width="80%" height="74" id="AutoNumber1" bgcolor="#00004F">
+    <tr>
+      <td width="1115" height="74">
+      <p align="center"><font color="#FFFFCC" face="Arial">&nbsp;You can 
+      download the accompanying source code from </font>
+      <font face="Arial" color="#FF0000"><a href="../../files/SOMDemo.zip">here</a></font><font color="#FFFFCC" face="Arial">. 
+      For those of you without compilers the zip file also contains an 
+      executable.</font><p align="center"><font face="Arial" color="#FFFFCC">(
+      </font><font face="Arial" color="#FF0000">Update:</font><font face="Arial" color="#FFFFCC"> 
+      A reader, <i>Kintar</i>, has also submitted a Java version. You can grab 
+      it <a href="../../files/SOMDemo_java.zip">here</a> ) </font></td>
+    </tr>
+  </table>
+  </center>
+</div>
+<p class="MsoNormal" align="left">&nbsp;</p>
+<p class="MsoNormal" align="left">&nbsp;</p>
+<p class="MsoNormal" align="left"><b>
+<font face="Arial" color="#FFFFCC" size="4">Network Architecture</font></b></p>
+<p class="MsoNormal" align="left"><font face="Arial">For the purposes of this 
+tutorial I'll be discussing a two dimensional SOM. The network is created from a 
+2D lattice of 'nodes', each of which is fully connected to the input layer.&nbsp; 
+Figure 2 shows a very small Kohonen network of 4 X 4 nodes connected to the input 
+layer (shown in green) representing a two dimensional vector.</font></p>
+<p class="MsoNormal" align="center">
+<img border="0" src="images/Figure2.jpg" width="300" height="300"></p>
+<p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">Figure 2</p>
+<p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">A 
+simple Kohonen network.</p>
+<p class="MsoNormal" align="left"><font face="Arial">Each node has a specific 
+topological position (an x, y coordinate in the lattice) and contains a vector 
+of weights of the same dimension as the input vectors. That is to say, if the training data 
+consists of vectors, <i>V</i>,&nbsp; of <i>n</i> dimensions:</font></p>
+<p class="MsoNormal" align="center"><font face="Arial" color="#FFFFFF"><i>V<sub>1</sub>, V<sub>2</sub>, 
+V<sub>3</sub>...V<sub>n</sub></i></font></p>
+<p class="MsoNormal" align="left"><font face="Arial">Then each node will contain 
+a corresponding weight vector <i>W, </i>of <i>n </i>dimensions:</font></p>
+<p class="MsoNormal" align="center"><font face="Arial" color="#FFFFFF"><i>W<sub>1</sub>, W<sub>2</sub>, 
+W<sub>3</sub>...W<sub>n</sub></i></font></p>
+<p class="MsoNormal" align="left"><font face="Arial">The lines connecting the 
+nodes in Figure 2 are only there to represent adjacency and do not signify a 
+connection as normally indicated when discussing a neural network.</font>
+<font color="#FFFFCC" face="Arial"><i>T</i><i>here are no lateral connections 
+between nodes within the lattice.</i></font></p>
+<p class="MsoNormal" align="left"><font face="Arial">The SOM shown in Figure 1 
+has a default lattice size of 40 X 40. Each node in the lattice has three 
+weights, one for each element of the input vector: red, green and blue. Each 
+node is represented by a rectangular cell when drawn to your display. Figure 3 
+shows the cells rendered with black outlines so you can clearly see each node. </font></p>
+<p class="MsoNormal" align="center">
+<img border="0" src="images/Figure3.jpg" width="300" height="300"></p>
+<p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">
+Figure 3</p>
+<p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">Each 
+cell represents a node in the lattice.</p>
+<p class="MsoNormal" align="center" style="margin-top: 0; margin-bottom: 0">&nbsp;</p>
+<hr>
+
+ <p align="center"><b><font face="Arial" color="#FFFFFF">1&nbsp;&nbsp;
+ <a href="som2.html">2</a>&nbsp;&nbsp; <a href="som3.html">3</a>&nbsp;&nbsp;
+ <a href="som4.html">4</a>&nbsp;&nbsp; <a href="som5.html">5</a>&nbsp;&nbsp;
+ <a href="../../index.html">Home</a>&nbsp; </font></b></p>
+
+ </BODY>
+ 
+</HTML>

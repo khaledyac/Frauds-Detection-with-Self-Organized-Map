@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta http-equiv="content-language" content="en-us" />
+    <meta name="generator" content="Hugo 0.29" />
+    
+    
+
+    <title>Creating hexagonal heatmaps with d3.js | Visual Cinnamon</title>
+    <meta name="author" content="Nadieh Bremer">
+    
+    <meta name="description" content="Teaching you how to create hexagonal heatmaps through d3.js, which can be used in Self organizing maps for example, with a little hover interaction to spruce things up">
+    
+    <meta name="keywords" content="d3.js, self organizing maps, hexagon, heatmap, tutorial">
+
+    
+    <link rel="canonical" href="https://www.visualcinnamon.com/">
+
+    
+    
+
+    
+    
+
+    
+    
+<link rel="icon" type="image/png" href='https://www.visualcinnamon.com/img/site/favicon-16x16.png' sizes="16x16">  
+<link rel="icon" type="image/png" href='https://www.visualcinnamon.com/img/site/favicon-32x32.png' sizes="32x32">  
+<link rel="icon" type="image/png" href='https://www.visualcinnamon.com/img/site/favicon-96x96.png' sizes="96x96">  
+
+    
+    
+
+
+
+<meta property="og:title" content="Creating hexagonal heatmaps with d3.js">
+<meta property="og:site_name" content="Visual Cinnamon">
+<meta property="og:url" content="https://www.visualcinnamon.com/2013/07/self-organizing-maps-creating-hexagonal.html">
+<meta property="og:description" content="Teaching you how to create hexagonal heatmaps through d3.js, which can be used in Self organizing maps for example, with a little hover interaction to spruce things up">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+
+    <meta property="og:image" content="https://www.visualcinnamon.com//img/blog/2013/heatmap-in-d3/d3_hexagonal_heatmap_feature.png"/>
+    <meta property="og:image:secure_url" content="https://www.visualcinnamon.com/img/blog/2013/heatmap-in-d3/d3_hexagonal_heatmap_feature.png"/>
+
+
+    
+    
+        <meta property="article:tag" content="d3.js" />
+    
+        <meta property="article:tag" content="self organizing maps" />
+    
+        <meta property="article:tag" content="hexagon" />
+    
+        <meta property="article:tag" content="heatmap" />
+    
+        <meta property="article:tag" content="tutorial" />
+    
+    
+    <meta property="article:author" content="Nadieh Bremer">
+
+
+
+
+    
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:image:src" content="https://www.visualcinnamon.com/img/blog/2013/heatmap-in-d3/d3_hexagonal_heatmap_feature.png"/>
+    
+    <meta name="twitter:site" content="@NadiehBremer"/>
+    <meta name="twitter:creator" content="@NadiehBremer"/>
+    <meta name="twitter:title" content="Creating hexagonal heatmaps with d3.js"/>
+    <meta name="twitter:description" content="Teaching you how to create hexagonal heatmaps through d3.js, which can be used in Self organizing maps for example, with a little hover interaction to spruce things up"/>
+
+
+    
+    <link rel="stylesheet" href='/css/main.css'/>
+
+    
+    
+      <link rel="stylesheet" href='/css/blog.css'>
+    
+
+    
+    
+
+    
+    
+
+    
+    <link rel="stylesheet" href="https://use.typekit.net/ibl0oid.css">
+
+    
+    
+    <script async src="/js/lazysizes.min.js"></script>
+
+    
+    
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-43942889-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-43942889-2', { 'anonymize_ip': true }); 
+</script>
+
+    <meta name="google-site-verification" content="uaqGQsMmI5C0in_1J5X4JODI7q2TLQDIo3wVeau0bAU" />
+
+  </head>
+  <body>
+
+    <svg version="1.1" id="header__hexagon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 418 560" xml:space="preserve">
+	<style type="text/css">
+		.hexagon-header-large  {fill: url(#gradient-header-large);}
+		.hexagon-header-medium {fill: url(#gradient-header-medium);}
+		.hexagon-header-small  {fill: url(#gradient-header-small);}
+		.hexagon-header-general {opacity: 1;}
+		.hexagon-header-overlay {fill: url(#overlay-header-img);}
+	</style>
+	<defs>
+		<pattern id="overlay-header-img" x="0" y="0" patternUnits="userSpaceOnUse" height="100" width="100">
+			<image x="1" y="1" xlink:href="data:image/png;base64,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"></image>
+		</pattern>
+        <linearGradient id="gradient-header-large" gradientUnits="userSpaceOnUse" x1="264.9866" y1="333.6309" x2="341.8304" y2="518.0563">
+            <stop offset="0" style="stop-color:#27CCC1"/>
+            <stop offset="1" style="stop-color:#1A77D1"/>
+        </linearGradient>
+        <linearGradient id="gradient-header-medium" gradientUnits="userSpaceOnUse" x1="67.7938" y1="199.5592" x2="111.7475" y2="339.2899">
+            <stop offset="0" style="stop-color:#2EC9D7"/>
+            <stop offset="1" style="stop-color:#1670C2"/>
+        </linearGradient>
+        <linearGradient id="gradient-header-small" gradientUnits="userSpaceOnUse" x1="205.3203" y1="-3.4952" x2="214.7691" y2="77.1841">
+            <stop offset="0" style="stop-color:#27E7CB"/>
+            <stop offset="1" style="stop-color:#1DAFE4"/>
+        </linearGradient>
+	</defs>
+	<g style="transform-origin: 50% 50%; transform: rotate(180deg)scale(-1,1)">
+		<g>
+			<polygon class="hexagon-header-general hexagon-header-large" points="192,364.4 192,494.9 305,560.1 418,494.9 418,364.4 305,299.2"/>
+			<polygon class="hexagon-header-overlay" fill="url(#overlay-img-top)" points="192,364.4 192,494.9 305,560.1 418,494.9 418,364.4 305,299.2"/>
+		</g>
+		<g>
+			<polygon class="hexagon-header-general hexagon-header-medium" points="0,213 0,314.6 88,365.4 176,314.6 176,213 88,162.2"/>
+			<polygon class="hexagon-header-overlay" fill="url(#overlay-img-top)" points="0,213 0,314.6 88,365.4 176,314.6 176,213 88,162.2"/>
+		</g>
+		<g>
+			<polygon class="hexagon-header-general hexagon-header-small hexagon-header-small" points="166,26.5 166,79.6 211.9,106.1 257.9,79.6 257.9,26.5 211.9,0"/>
+			<polygon class="hexagon-header-overlay hexagon-header-small" fill="url(#overlay-img-top)" points="166,26.5 166,79.6 211.9,106.1 257.9,79.6 257.9,26.5 211.9,0"/>
+		</g>
+	</g>
+</svg>
+
+<header class="header_main">
+
+    
+
+
+<nav class="nav_main" id="navbar">
+    <ul class="nav_main__list nav_main__list-left">
+        
+        <li class="nav_main__item">
+            <a class="nav_main__link" href="/portfolio/">My Work</a>
+        </li>
+        
+        <li class="nav_main__item">
+            <a class='nav_main__link' href='/contact'>Hire Me</a>
+        </li>
+        
+    </ul>
+
+    <h1 class="header_main__logo">
+        <a class="header_main__link img-link" href="/" title="VisualCinnamon.com">
+            <img class="main_logo" src='https://www.visualcinnamon.com/svg/site/logo_visualcinnamon.svg' >
+        </a>
+    </h1>
+
+    <ul class="nav_main__list nav_main__list-right">
+        
+        <li class="nav_main__item">
+            
+                <a class='nav_main__link' href='/about'>About</a>
+            
+        </li>
+        
+        <li class="nav_main__item">
+            
+                <a class="nav_main__link nav_main__link_mobile" href="/blog/">Blog</a>
+                <a class="nav_main__link nav_main__link_desktop" href="/blog/">Blog &#43; More</a>
+            
+        </li>
+        
+    </ul>
+</nav>
+
+</header>
+
+<div class="container">
+    <header class="blog__title">
+        <div class="blog__date script">
+            <p>Posted on July 22, 2013</p>
+        </div>
+        <h1>Creating hexagonal heatmaps with d3.js</h1>
+    </header>
+
+    <article>
+        <ul class=share__list>
+    <li>
+        <a class="share__button" title="Tweet on Twitter" href="https://twitter.com/share?text=Creating%20hexagonal%20heatmaps%20with%20d3.js%20by%20@NadiehBremer%20via%20Visual%20Cinnamon"><svg xmlns="http://www.w3.org/2000/svg" id="twitter-circle-icon" class="twitter circle icon" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 96 96" style="enable-background:new 0 0 96 96;" xml:space="preserve">
+    <g>
+        <path d="M48,0C21.488,0,0,21.49,0,48c0,26.511,21.488,48,48,48c26.51,0,48-21.489,48-48   C96,21.49,74.51,0,48,0z M67.521,39.322c0.02,0.406,0.027,0.814,0.027,1.224c0,12.493-9.51,26.899-26.898,26.899   c-5.338,0-10.307-1.566-14.49-4.249c0.738,0.089,1.49,0.133,2.254,0.133c4.43,0,8.506-1.511,11.742-4.048   c-4.137-0.075-7.629-2.809-8.832-6.564c0.578,0.109,1.17,0.17,1.779,0.17c0.861,0,1.697-0.116,2.49-0.332   c-4.324-0.869-7.584-4.689-7.584-9.271c0-0.04,0-0.079,0.002-0.118c1.273,0.708,2.732,1.133,4.281,1.183   c-2.537-1.696-4.205-4.589-4.205-7.87c0-1.732,0.465-3.355,1.279-4.752c4.662,5.72,11.629,9.483,19.486,9.878   c-0.162-0.692-0.244-1.414-0.244-2.155c0-5.221,4.232-9.453,9.453-9.453c2.719,0,5.176,1.148,6.9,2.985   c2.154-0.424,4.178-1.21,6.004-2.294c-0.707,2.207-2.205,4.061-4.156,5.23c1.912-0.229,3.734-0.736,5.43-1.488   C70.973,36.324,69.369,37.99,67.521,39.322z" />
+    </g>
+</svg></a>
+    </li>
+    <li>
+        <a class="share__button" title="Share on Facebook" href="https://www.facebook.com/sharer/sharer.php?u=%2f2013%2f07%2fself-organizing-maps-creating-hexagonal.html"><svg version="1.1" id="facebook-circle-icon" class="facebook circle icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+<path d="M16,0C7.2,0,0,7.2,0,16c0,8.8,7.2,16,16,16s16-7.2,16-16C32,7.2,24.8,0,16,0z M20.2,10.7l-1.5,0
+	c-1.2,0-1.4,0.6-1.4,1.4v1.8h2.8l-0.4,2.8h-2.4V24h-2.9v-7.3h-2.5v-2.8h2.5v-2.1C14.3,9.3,15.8,8,18,8c1,0,1.9,0.1,2.2,0.1V10.7z"/>
+</svg></a>
+    </li>
+    <li>
+        <a class="share__button" title="Share on LinkedIn" href="https://www.linkedin.com/cws/share?url=%2f2013%2f07%2fself-organizing-maps-creating-hexagonal.html"><svg xmlns="http://www.w3.org/2000/svg" id="linkedin-circle-icon" class="linkedin circle icon" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve">
+<path d="M46.8,44.1V32.4c0-6.3-3.3-9.2-7.8-9.2c-3.6,0-5.2,2-6.1,3.4v-2.9h-6.8c0.1,1.9,0,20.4,0,20.4h6.8V32.7c0-0.6,0-1.2,0.2-1.7
+	c0.5-1.2,1.6-2.5,3.5-2.5c2.5,0,3.4,1.9,3.4,4.6v10.9L46.8,44.1L46.8,44.1z M19,20.9c2.4,0,3.8-1.6,3.8-3.5c0-2-1.5-3.5-3.8-3.5
+	s-3.8,1.5-3.8,3.5C15.2,19.4,16.6,20.9,19,20.9L19,20.9z M30,60C13.4,60,0,46.6,0,30C0,13.4,13.4,0,30,0s30,13.4,30,30
+	C60,46.6,46.6,60,30,60z M22.4,44.1V23.7h-6.8v20.4H22.4z"/>
+</svg>
+</a>
+    </li>
+    <li>
+        <a class="share__button" title="Share via email" href="mailto:?subject=Creating%20hexagonal%20heatmaps%20with%20d3.js%20from%20Visual%20Cinnamon&body=Check%20out%20what%20I%20found%20on%20Visual%20Cinnamon:%20%2f2013%2f07%2fself-organizing-maps-creating-hexagonal.html"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="email circle icon" version="1.1" id="email-circle-icon" x="0px" y="0px" viewBox="0 0 612 612" style="enable-background:new 0 0 612 612;" xml:space="preserve">
+    <g>
+        <g>
+            <path d="M306,612c-28.152,0-55.284-3.672-81.396-11.016c-26.112-7.347-50.49-17.646-73.134-30.906    s-43.248-29.172-61.812-47.736c-18.564-18.562-34.476-39.168-47.736-61.812c-13.26-22.646-23.562-47.022-30.906-73.135    C3.672,361.284,0,334.152,0,306s3.672-55.284,11.016-81.396s17.646-50.49,30.906-73.134s29.172-43.248,47.736-61.812    s39.168-34.476,61.812-47.736s47.022-23.562,73.134-30.906S277.848,0,306,0c42.024,0,81.702,8.058,119.034,24.174    s69.768,37.944,97.308,65.484s49.368,59.976,65.484,97.308S612,263.976,612,306c0,28.152-3.672,55.284-11.016,81.396    c-7.347,26.109-17.646,50.487-30.906,73.134c-13.26,22.644-29.172,43.248-47.736,61.812    c-18.562,18.564-39.168,34.479-61.812,47.736c-22.646,13.26-47.022,23.562-73.136,30.906C361.284,608.328,334.152,612,306,612z     M453.492,179.928H163.404c-2.856,0-5.304,0.918-7.344,2.754s-3.06,4.386-3.06,7.65v32.436c0,1.632,0.612,2.448,1.836,2.448    l152.388,86.904l1.227,0.612c0.813,0,1.428-0.204,1.836-0.612l147.492-86.904c0.813-0.408,1.428-0.612,1.836-0.612    c0.405,0,1.02-0.204,1.836-0.612c1.632,0,2.448-0.816,2.448-2.448v-31.212c0-3.264-1.021-5.814-3.063-7.65    S456.348,179.928,453.492,179.928z M245.412,310.284c0.408-0.408,0.612-1.021,0.612-1.836c0-1.227-0.408-1.836-1.224-1.836    l-87.516-50.185c-1.224-0.408-2.244-0.408-3.06,0c-0.816,0-1.224,0.612-1.224,1.836v131.58c0,1.227,0.612,2.04,1.836,2.448h1.224    c0.816,0,1.224-0.204,1.224-0.612L245.412,310.284z M351.9,320.076c-0.408-1.227-1.431-1.428-3.063-0.612l-33.66,19.584    c-4.08,2.448-8.361,2.448-12.852,0l-29.376-16.521c-1.224-0.816-2.244-0.816-3.06,0l-111.996,104.04    c-0.408,0.405-0.612,1.224-0.612,2.445c0,0.408,0.408,1.021,1.224,1.836c2.448,0.816,4.08,1.227,4.896,1.227H450.43    c0.816,0,1.635-0.408,2.448-1.227c0-1.632-0.204-2.649-0.612-3.06L351.9,320.076z M462.06,253.98h-2.445l-83.232,49.572    c-0.813,0-1.224,0.612-1.224,1.836c-0.408,0.408-0.204,1.02,0.609,1.833L459,397.188c0.816,0.816,1.428,1.227,1.836,1.227h1.224    c1.227-1.227,1.839-2.04,1.839-2.448V256.429C463.896,255.612,463.284,254.796,462.06,253.98z" />
+        </g>
+    </g>
+</svg></a>
+    </li>
+</ul>
+        <p>In my <a href='/2013/07/on-creation-of-extended-self-organizing'>previous post</a> I spoke a bit about a program I wrote in R that helps me perform <strong>self organizing map</strong> (SOM) analyses and create heatmaps. From the cleaned data file all the way to the visualization and analysis of the heatmaps.
+</p>
+
+
+    <p class="blog__background_highlight_p">If you want to know how to add boundaries to heatmaps, see <a href='/2013/07/self-organizing-maps-adding-boundaries'>my next post</a> that deals specifically with the boundaries once you have your heatmap all set up.</p>
+
+
+
+
+<p>One minor issue with the R program was that I wasn&rsquo;t allowed to hand over the part to analyse the SOM heatmaps to the client. So all they got was a PowerPoint with static images and our strategic findings about the (client) segmentation. Still very interesting of course, since usually we show them insights they&rsquo;ve never found before. Or has never been proven or not shown in that amount of detail. But I wanted to develop something a bit more <em>sexy</em> I guess.</p>
+
+<p>Having tried to use d3.js a bit in the past few months, I knew that creating a webpage where the client can go through all the heatmaps and have a bit of analyzing capabilities would be just what I was looking for and d3.js makes almost everything look good.</p>
+
+<p class="blog__sidenote">Try hovering the hexagonal heatmap below <span style="font-style: normal;">｡^‿^｡</span></p>
+
+
+<p>I used the <a href="https://github.com/d3/d3-plugins/tree/master/hexbin">d3 hexbin plugin</a>, even though I have nothing to <em>bin</em>. By using this plugin in a slightly different way than intended I do not have to make a function that draws each hexagon myself.</p>
+
+
+
+
+    <div class="blog__extra_file blog__article_width">
+
+        <!-- Used in blog 2013-07-22-self-organizing-maps-creating-hexagonal.md -->
+<div id="heatmap-chart" style="text-align: center;"></div>
+    </div>
+
+<p>I have to admit that d3 (but especially JavaScript) has been one of the most difficult programming languages I&rsquo;ve tried to learn. Quite a different structure from R and IDL and even VBA and SAS came to me faster.</p>
+
+<h3 id="hexagons-101">Hexagons 101</h3>
+
+<p>There really is only one difficult step in the whole process and that is <strong>calculating the centers of each hexagon</strong>. But to do this I first need to know the map dimensions (number of rows and columns) and decide what the radius of one hexagon needs to be.</p>
+
+<p>Say I want the heatmap to fit inside a rectangular shape of 850 by 350 pixels and my map has 30 columns and 20 rows. The maximum radius that a single hexagon can have depends on which value is smaller; the radius so 30 hexagons will fit into 850px or the radius needed to still fit 20 hexagons inside 350px.</p>
+
+<p>Radius, height and width of a hexagon are thankfully all very much related. <a href="http://www.redblobgames.com/grids/hexagons/">This site</a> really helped me to get an understanding of hexagons and their dimensions in a grid. Say <code>hexRadius</code> is the radius of a hexagon, it is the circle that can be drawn so all six corners touch the circle</p>
+
+<ul>
+<li>The height of a hexagon = <code>hexRadius * 2</code></li>
+<li>The width of a hexagon =  <code>hexRadius * Math.sqrt(3)</code></li>
+</ul>
+
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#60a0b0;font-style:italic">//The height of the total heatmap will be
+</span><span style="color:#60a0b0;font-style:italic"></span>num_rows <span style="color:#666">*</span> <span style="color:#40a070">3</span><span style="">/2 * hexRadius + 1/2 * hexRadius</span>
+<span style="color:#60a0b0;font-style:italic">//which is the same as
+</span><span style="color:#60a0b0;font-style:italic"></span>(num_rows <span style="color:#666">+</span> <span style="color:#40a070">1</span><span style="">/3) * 3/2 * hexRadius</span>
+
+<span style="color:#60a0b0;font-style:italic">//The width of the total heatmap will be
+</span><span style="color:#60a0b0;font-style:italic"></span>num_columns <span style="color:#666">*</span> <span style="color:#007020">Math</span>.sqrt(<span style="color:#40a070">3</span>) <span style="color:#666">*</span> hexRadius <span style="color:#666">+</span> <span style="color:#007020">Math</span>.sqrt(<span style="color:#40a070">3</span>)<span style="">/2 * hexRadius</span>
+<span style="color:#60a0b0;font-style:italic">//which is the same as
+</span><span style="color:#60a0b0;font-style:italic"></span>(num_columns <span style="color:#666">+</span> <span style="color:#40a070">1</span><span style="">/2) * Math.sqrt(3) * hexRadius</span></code></pre>
+</div>
+
+<p>My final formula, that calculates the &lsquo;best&rsquo; hexagonal radius is then the following:</p>
+
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#60a0b0;font-style:italic">//SVG sizes and margins
+</span><span style="color:#60a0b0;font-style:italic"></span><span style="color:#007020;font-weight:bold">var</span> margin <span style="color:#666">=</span> {
+    top<span style="color:#666">:</span> <span style="color:#40a070">50</span>,
+    right<span style="color:#666">:</span> <span style="color:#40a070">20</span>,
+    bottom<span style="color:#666">:</span> <span style="color:#40a070">20</span>,
+    left<span style="color:#666">:</span> <span style="color:#40a070">50</span>
+},
+width <span style="color:#666">=</span> <span style="color:#40a070">850</span>,
+height <span style="color:#666">=</span> <span style="color:#40a070">350</span>;
+
+<span style="color:#60a0b0;font-style:italic">//The number of columns and rows of the heatmap
+</span><span style="color:#60a0b0;font-style:italic"></span><span style="color:#007020;font-weight:bold">var</span> MapColumns <span style="color:#666">=</span> <span style="color:#40a070">30</span>,
+    MapRows <span style="color:#666">=</span> <span style="color:#40a070">20</span>;
+
+<span style="color:#60a0b0;font-style:italic">//The maximum radius the hexagons can have to still fit the screen
+</span><span style="color:#60a0b0;font-style:italic"></span><span style="color:#007020;font-weight:bold">var</span> hexRadius <span style="color:#666">=</span> d3.min([width<span style="">/((MapColumns + 0.5) * Math.sqrt(3)),</span>
+    height<span style="">/((MapRows + 1/3) * 1.5)]);</span></code></pre>
+</div>
+
+<h3 id="getting-the-center-coordinates">Getting the center coordinates</h3>
+
+<p>Now that we finally have a radius that will make sure the entire map fits the available space, we can calculate the centers of each hexagon. Using the image below we can see that two hexagons are 1 width apart horizontally (<code>= Math.sqrt(3) * hexRadius</code>) and <sup>3</sup>&frasl;<sub>4</sub> height apart vertically (<code>= 3/2 * hexRadius</code>).</p>
+
+
+<figure  class='blog__img-half-width' >
+    
+        
+            <img src='https://d33wubrfki0l68.cloudfront.net/d64fc7cbb4053fd09e8af797fdd123c58e709d23/f561b/img/blog/2013/heatmap-in-d3/hexagon_dimensions.png' alt='' class=''>
+         
+     
+    
+    <figcaption>How the width and height of a hexagon relate to their grid positions</figcaption>
+    
+</figure>
+
+<p>Strangely enough, for the hexbin plugin, you do not need to take the offset into account that occurs when going to a new row, which is moved half a hexagon&rsquo;s width to the left. Therefore, calculating the centers is easily done by the following for loop:</p>
+
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#60a0b0;font-style:italic">//Calculate the center positions of each hexagon 
+</span><span style="color:#60a0b0;font-style:italic"></span><span style="color:#007020;font-weight:bold">var</span> points <span style="color:#666">=</span> [];
+<span style="color:#007020;font-weight:bold">for</span> (<span style="color:#007020;font-weight:bold">var</span> i <span style="color:#666">=</span> <span style="color:#40a070">0</span>; i <span style="color:#666">&lt;</span> MapRows; i<span style="color:#666">++</span>) {
+    <span style="color:#007020;font-weight:bold">for</span> (<span style="color:#007020;font-weight:bold">var</span> j <span style="color:#666">=</span> <span style="color:#40a070">0</span>; j <span style="color:#666">&lt;</span> MapColumns; j<span style="color:#666">++</span>) {
+        points.push([hexRadius <span style="color:#666">*</span> j <span style="color:#666">*</span> <span style="color:#40a070">1.75</span>, hexRadius <span style="color:#666">*</span> i <span style="color:#666">*</span> <span style="color:#40a070">1.5</span>]);
+    }<span style="color:#60a0b0;font-style:italic">//for j
+</span><span style="color:#60a0b0;font-style:italic"></span>}<span style="">//for i</span></code></pre>
+</div>
+
+<p>Where <code>1.75 ~ Math.sqrt(3)</code>, strangely enough giving it exactly <code>Math.sqrt(3)</code> resulted in a jump after about 12 hexagons. This does work, so I kept it at <code>1.75</code>. Now we have an array that holds all <code>[x,y]</code> center coordinates, which is all you need. The hexbin plugin deals with converting this into an actual hexagon path with 6 sides.</p>
+
+<h3 id="drawing-the-hexagonal-grid">Drawing the hexagonal grid</h3>
+
+<p>Now lets create a placeholder for the heatmap; an SVG and initiate the hexbin plugin</p>
+
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#60a0b0;font-style:italic">//Create SVG element
+</span><span style="color:#60a0b0;font-style:italic"></span><span style="color:#007020;font-weight:bold">var</span> svg <span style="color:#666">=</span> d3.select(<span style="color:#4070a0">&#34;#chart&#34;</span>).append(<span style="color:#4070a0">&#34;svg&#34;</span>)
+    .attr(<span style="color:#4070a0">&#34;width&#34;</span>, width <span style="color:#666">+</span> margin.left <span style="color:#666">+</span> margin.right)
+    .attr(<span style="color:#4070a0">&#34;height&#34;</span>, height <span style="color:#666">+</span> margin.top <span style="color:#666">+</span> margin.bottom)
+    .append(<span style="color:#4070a0">&#34;g&#34;</span>)
+    .attr(<span style="color:#4070a0">&#34;transform&#34;</span>, <span style="color:#4070a0">&#34;translate(&#34;</span> <span style="color:#666">+</span> margin.left <span style="color:#666">+</span> <span style="color:#4070a0">&#34;,&#34;</span> <span style="color:#666">+</span> margin.top <span style="color:#666">+</span> <span style="color:#4070a0">&#34;)&#34;</span>);
+
+<span style="color:#60a0b0;font-style:italic">//Set the hexagon radius
+</span><span style="color:#60a0b0;font-style:italic"></span><span style="color:#007020;font-weight:bold">var</span> hexbin <span style="color:#666">=</span> d3.hexbin().radius(hexRadius);</code></pre>
+</div>
+
+<p>And the last piece of code that will draw the hexagonal grid for you. See how the data step gets <code>hexbin(points)</code>, not just <code>points</code></p>
+
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#60a0b0;font-style:italic">//Draw the hexagons
+</span><span style="color:#60a0b0;font-style:italic"></span>svg.append(<span style="color:#4070a0">&#34;g&#34;</span>)
+    .selectAll(<span style="color:#4070a0">&#34;.hexagon&#34;</span>)
+    .data(hexbin(points))
+    .enter().append(<span style="color:#4070a0">&#34;path&#34;</span>)
+    .attr(<span style="color:#4070a0">&#34;class&#34;</span>, <span style="color:#4070a0">&#34;hexagon&#34;</span>)
+    .attr(<span style="color:#4070a0">&#34;d&#34;</span>, <span style="color:#007020;font-weight:bold">function</span> (d) {
+        <span style="color:#007020;font-weight:bold">return</span> <span style="color:#4070a0">&#34;M&#34;</span> <span style="color:#666">+</span> d.x <span style="color:#666">+</span> <span style="color:#4070a0">&#34;,&#34;</span> <span style="color:#666">+</span> d.y <span style="color:#666">+</span> hexbin.hexagon();
+    })
+    .attr(<span style="color:#4070a0">&#34;stroke&#34;</span>, <span style="color:#4070a0">&#34;white&#34;</span>)
+    .attr(<span style="color:#4070a0">&#34;stroke-width&#34;</span>, <span style="color:#4070a0">&#34;1px&#34;</span>)
+    .style(<span style="color:#4070a0">&#34;fill&#34;</span>, <span style="color:#4070a0">&#34;teal&#34;</span>);</code></pre>
+</div>
+
+<p>You should now have something like the image below, a teal colored grid</p>
+
+
+<figure  class='blog__img-half-width' >
+    
+        
+            <img data-src='https://d33wubrfki0l68.cloudfront.net/90ede01146cccadabbe3b365d1b1659f37a81643/61041/img/blog/2013/heatmap-in-d3/hexagonal_grid.png' alt=''  class='lazyload'>
+         
+     
+    
+    <figcaption>A teal colored grid of hexagons, 20 by 30 hexagons in dimension</figcaption>
+    
+</figure>
+
+<h3 id="colors">Colors</h3>
+
+<p class="blog__sidenote">I pre-calculated the hex colors in R.</p>
+
+
+<p>Now that we have a grid, let&rsquo;s add some color, which is the easy part actually. I started with an array of color hex codes, instead of numeric data, just to make my life easier.</p>
+
+<p>Just replace the line where you have set the <code>fill</code> to one color for all hexagons, to one that depends on the iterator <code>i</code> of the hexagon number. Now the color of the i&rsquo;th hexagon will be filled with the i&rsquo;th entry of the array <code>color</code></p>
+
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">.style(<span style="color:#4070a0">&#34;fill&#34;</span>, <span style="color:#007020;font-weight:bold">function</span> (d,i) { <span style="color:#007020;font-weight:bold">return</span> color[i]; })</code></pre>
+</div>
+
+<p>The heatmap below is the result of adding a splash of color. It actually <strong>represents the expected revenue of a supermarkets in the Netherlands</strong>. Red being a lot of revenue and blue being not so much revenue</p>
+
+
+<figure  class='blog__img-half-width' >
+    
+        
+            <img data-src='https://d33wubrfki0l68.cloudfront.net/a71732dfbbfc714d3a725d23452b441a912a8b84/d4669/img/blog/2013/heatmap-in-d3/d3_hexagonal_heatmap_feature.png' alt=''  class='lazyload'>
+         
+     
+    
+    <figcaption>Coloring the heatmap is only needs 1 line of code change</figcaption>
+    
+</figure>
+
+<p>You can find the code and example in <a href="http://bl.ocks.org/nbremer/6052814">this bl.ock</a>. I added some other lines of code to have a nice mouse over event, a bit of styling, etc.</p>
+
+<h3 id="final-result">Final result</h3>
+
+<p>Below you can see what I eventually made using d3. It now has options to show multiple heatmaps, where you can pick a variable from the drop down list. There is a legend that tells you which color belongs to which value. And finally, there is a slider that gives you the option to tweak the color boundaries. Slide the left handle towards the right and the number below it shows where dark blue is reached, every value below the one from the handle will be dark blue as well. The heatmap colors get updated while you slide it.
+This gives me the chance to investigate a portion of the map that is all primarily one color, by adjusting the handles I can tweak the colors to show more detail in that section. You can see the result of sliding a handle in the two images below</p>
+
+
+<figure  class='blog__img-full-width' >
+    
+        
+            <img data-src='https://d33wubrfki0l68.cloudfront.net/7ff1d59dccf015a2f7c811c15f56532e14470911/99de2/img/blog/2013/heatmap-in-d3/som_heatmaps_slider_color_change.png' alt=''  class='lazyload'>
+         
+     
+    
+    <figcaption>The default heatmap for &#39;local share&#39; on the left and after moving the color slider on the right</figcaption>
+    
+</figure>
+
+<p>In <a href='/2013/07/self-organizing-maps-adding-boundaries'>my next post</a> I explain how to calculate the black lines that form the boundary between the heatmap segments with just one &lsquo;simple&rsquo; mathematical principle.</p>
+        
+
+    <h3>See also</h3>
+    <ul class="blog__related_post_list">
+        
+            <a class='blog__related_post_link img-link' href='/2013/07/self-organizing-maps-adding-boundaries'>
+                <li class="blog__related_post_item">
+                    <p class="blog__related_type script">blog</p>
+                    <div class="blog__related_post_img" style="background-image: url(/img/blog/2013/heatmap-boundaries/hexagonal_heatmap_segments.png);"></div>
+                    <h5 class="blog__related_title">Adding boundaries inside a hexagonal heatmap with d3.js</h5>
+                    <p class="blog__related_description">Continuing on my previous post about hexagonal heatmaps, this one will teach you how to create boundaries inside them to separate out groups, needed for self organizing map analyses</p>
+                </li>
+            </a>
+        
+            <a class='blog__related_post_link img-link' href='/2016/05/smooth-color-legend-d3-svg-gradient'>
+                <li class="blog__related_post_item">
+                    <p class="blog__related_type script">blog</p>
+                    <div class="blog__related_post_img" style="background-image: url(/img/blog/2016/gradient-legend/smooth_gradient_legend_feature.jpg);"></div>
+                    <h5 class="blog__related_title">Creating a smooth color legend with an SVG gradient</h5>
+                    <p class="blog__related_description">Legends are very important in data visualization and in this blog I&#39;ll show you how to create a color legend for a gradually changing color scheme</p>
+                </li>
+            </a>
+        
+            <a class='blog__related_post_link img-link' href='/2013/11/how-to-create-hexagonal-heatmap-in-r'>
+                <li class="blog__related_post_item">
+                    <p class="blog__related_type script">blog</p>
+                    <div class="blog__related_post_img" style="background-image: url(/img/blog/2013/heatmap-in-r/r_heatmap_feature.png);"></div>
+                    <h5 class="blog__related_title">How to create a hexagonal heatmap in R</h5>
+                    <p class="blog__related_description">Sharing a snippet of code that will let you create hexagonal heatmaps in R</p>
+                </li>
+            </a>
+        
+    </ul>
+
+    </article>
+</div>
+
+
+<div class="to-the-top" style="display: block;">
+    <button id="to-top-button" title="Go to top">
+        <svg version="1.1" id="top-top-arrow" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+            y="0px" width="53px" height="20px" viewBox="0 0 53 20" enable-background="new 0 0 53 20" xml:space="preserve">
+            <polygon points="43.886,16.221 42.697,17.687 26.5,4.731 10.303,17.688 9.114,16.221 26.5,2.312 	"></polygon>
+        </svg>
+    </button>
+</div>
+<script src='https://www.visualcinnamon.com/app.js'></script>
+
+<script src="/js/d3.v3.min.js"></script>
+<script src="/js/blog/hexagonal_heatmap.js"></script>
+
+<footer>
+    <svg version="1.1" id="footer__hexagon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="418px" height="560px" viewBox="0 0 418 560" enable-background="new 0 0 418 560" xml:space="preserve">
+	<style type="text/css">
+		.hexagon-footer-large  {fill: url(#gradient-footer-large);}
+		.hexagon-footer-medium {fill: url(#gradient-footer-medium);}
+		.hexagon-footer-small  {fill: url(#gradient-footer-small);}
+		.hexagon-footer-general {opacity: 0.9;}
+		.hexagon-footer-overlay {fill: url(#overlay-footer-img);}
+	</style>
+	<defs>
+		<pattern id="overlay-footer-img" x="0" y="0" patternUnits="userSpaceOnUse" height="100" width="100">
+			<image x="1" y="1" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAgMAAADQNkYNAAAADFBMVEWfu8x9lq5idJBIUWs5ew2TAAAABHRSTlMVFRUVlNGiUwAAC4RJREFUaN7t2WmMc1MYB/D/WdqeztzOnM7UXtx2imJwZ6YYDE6nRfGK2hJrUktCrLUvsZxZUBS1REgsfb2IxDbWkBCn06IY1BJLELVEfEDGEsQWtb+cji++zrfJ/NLb25zzPOd5zgPJ5W67E0S/zq04r3nRjzjDIY1DB9h81jsnkFVu1XZMTtUi4x/AqBdbXPO+Pkhj/OW4uw41qjBIn7UdKvGOUHB/0DwYgFMn9Ww03Mejg2uWL0hOS0JsR/SkNN1jam/v5HHn+L00MHDkipBclDuNDjEOKZTtIPPkmFA/9b6qNghodLNh/lASDygJeGtfO0k926FWGhYC0VHyXoIyEln5ItXXqj6AZTDlR9F2cOlBBXYcGNzwlNiTWH8GJ6/F9eJVzgZTL0uR5MR2CDewC198ugEEPO2SzSLewIwCKpikQGHLedtR3ouxck15BTWMxcOpC4p0bU1AegtihWdyXfyZL0vbe7SBEW8WtP9RqEoRC140la7Jdro2coztqHp9ZMc1EHo8T310bkV0QtaJOk7Xw8xQBs+xHc6lHi727Trry5mh9oVZti9IYFoL+K6e4i4XQduBfDgpjmcyd/F+VxrW/JBqrmgFuPxwLI7DSNuxbki1Dwz1GSXMMAGgRaH30nm99QZ8sBnYk3u2gyotgMouD2BibQDOdA4lHlDiIhFfRRSyXdwtYW52nQ8kVKBehJP0z/HKFOmRoSnGdcbJ2I4pP90aM/Fs9OwvoSgGa/V10JoNLd46HCMGONV2+Ik3onxi08wVrsOdz5CDareJ4+CY+TipDHPbcW7yMm/q0Ul8gct1SLnNqwIbnKslNF8sPq1SMWY7HNLYbb1Whm677zVUVTaBEw/8I25tBzCv+TdbO82e6MCRL5UCPSeo/XfwAiJ9cwwc525rO9RuQR1GAp4hTQny9WyxeDdKjgoGKwvyTSlsB4cUH6HhLBXNtoOjGfKDbqzi5Lk6ndndKbfG4/2Rh8jjaqD4FZG2461Xs9u6yVpzpdETalQASMvRcBu6oRVNN8K2Q4JghJdOH/8RE1d4SWSxKSBel/1MOwQ+Yjs0ZS5DJGHyA1/xd/SqQPxiii/QdAHCVXM321G8cy48obZujrixtZuAjO+pDn6ympoQ9RdnJIewHVenwRrM1QAPs9gGEE6OIxFNr39TahKkt4v/FkoDQ4OqsavuGmq2w8Ho368w0KrSZ6EAc8Q+QpiA8JEu/vCrrNerNyLV6zwSBgdzd9YSl37TgnbH662DbUd2b9nTw3Hr1mG3VBq6gUUI3O0C1EOd5QLteDevhMTuUOxQ90SpJ9RQgeXFaCL9zC0uh0smoiO2w/1iz7Rk/rePL/JVcy2nVUD8KOpG7/aSqUrzBTZtOwDAOCzpsIse03v9iC3FOFnFVO7PFGE7moB7xVFOnkN/FBWGOSF3Q10ify2f7TBV4oIwx8zWHV5qtEbC1R66HhoDsdc+XMSX47ZjHtoLYSzHCC7cP7a9y/I+A1LLRwbr60kgajvGBQlUT8vSHoI0d8DEh2JhI3mowtNp7rFVF9qOCPe8of7tHSURm7/V7DmpexMEYOSSrDuEqGs7xELst5Q4/SaZOBL+EJXldZ+JQsxetee0CjBpO+QaQ6i+khlK9YmZp7bASZLfOGGyBKOBeUGja6xrOyDuWzEv1zzdzax85VLjPOhMpPcIHomwhMIo+47YjqSJ/PGsK6fXkKEc+AY9cLHmHlxq6SZGbf/1NzWyX+ANt6Fnj3QBdckW5NifdWvxj99sO1S7lLjKZFF75O0oSX6aYqm1IW5AKbC50xNKjI7Zju9i+/z674l9W/4vsHt9gSvJ3HNdHavts5Ls6wnbYST+I4THuzgmvePcdc3AJOdJtQ13Bogz4ky7tLfAvyhj7ZSwHd8JDRd0egrJy7O5eFx8rJ6CEn1pU4ZnXiG245qiqzDzOWQiijEnEJLF7Lgsrjh45MdbheK+Lo6hA9VSm17iNnRxEFxYCHINYGGN8PMYO3k+x6XZIRIeWPxtz9uOyGaesZO9CzkXTEg2SG1H57Sm/vcFa9Bt0O00tx3akyBAs7/NEX/iIbiiz/t6zXtOM08h4t7eN247qhRLLDpe00i3bYcfgOsxPMfw/r2FwQvQO92HY0xrAEiEj9f9toNXprCytvHEd7p4x2u+zIMo/rNisR1p1gZzr0ackBaNTYs7TR5hVFz/jBcdRu+g7bjcS+VcvX4Ru+ElDFWY9IKb+SZqjfbI/dsA2N129I35lqqQgtU50cXRCb2UPp+6fInQtB2/Rge4M0YHHa/bAWg7HoWaQSPstOPVZ4DZFbMAG/1+tcrYduiGNr6gF+GP17qVGbaj833r9kLjQy/vrC17OyeKKgFaFnfRv72P7egkQGe9E+43A1fU1Vha45KK0KfMmb8SpO0wufIk/qtRsD3jZNjfu8Sue21Hg+CPszp0ipMTu44CXFzdWvO+T/5op2zv7PXj/siL3ROg7UD0tb/j3D77bMcz2IPME5WBM+dBCO2k0IMnFQ8mimF4JzzSxTtdhLN60rK6DMsxGAOnSq/rmOIchvfi/Xoq6JoRnhkXd44YxGxHClgjP/uJDqm1gIBP5fd2jlfAqYJiYGWGJG1Hp6tZ/X3srsd2U0n4G28CZOOUebmfsA/jnqcIZsnTX0tz+Wu32Q76LAp2Ifp3lWc7Ol1c6LcSSq3XIJv0e2EoZ2px+q8uz3ZAJvS/i0lj4MbhtZCkP3VxoaLZ/+oRbAdXctHLzIHVAT162kcreYyID4hpz6AY2BWe7ZDmmJCZKqR2IBjCHAcoYnrLzXvw2llyb3f94S4+67tp8p+nabSI+MAuWwYRddSQZzvg8WzEW/rVbMfa7qX6UbftL4eIC5pes4nFAoDRoEtduT7itiM7pnWpML2ZFwFXCUGqC4Fe0EZLfSfk1Q6TtkPudvSpS/QtAwTBQBePgB/spbhGkB/ispoG0ExoodVp+P3htouSv/ivs3HsIeISNqO555FVtiMDEvv34UiOqqYFoTQTLxPbUUA8A+gS6grV3q+hrt6NrF7j2w43rYGc69YVCgGc+Sy02SV5qq5uJFkHWsZ2OA6UoKy8o++uw7q18bb/Wtdk/qvusR2dP5ifU9Pvl3HA5dFw4R9dge34Eor8fkElGhWOref/VdDYjl87Re0gfw1Rey4MnkLL0UujYrVO0nZ0okLEICN0ryWixvbmKuSK+x+j9i/TncT+amsX8qwkNA5KykkoXbEdqPbO2/0Hnmd/rJ/t6HzsnxcCGwpXrPZY2xEb+Xa1y0NHvLvHiiBVN8IrrZ/gOPVl21G5wan92UFJqpiD6BSwYW63QI8RutHFIScQBk+Fn2tVBl/O4+2n4OY357V6zfEi/kedEdtB0hMJnXbY/enwVmixlPakOGBy8FZsjUOB6Bq2o5Or/nNVbMfGDKigjoCrEHglXJufo+4IEhtnvExBxUjUdoSEMv/ViNuOTj+Wj4na3ScblHaPPJpAcQTl1fo12yE/tS9efIcCs5Bu2Oc4XbxTxzIADJyZ4YDxCex9ZH5B/1Xn2o5OBkaEK/A1iqASSv8rA9uOMLwDf703XqrEsB2tTzmhacM8U3w5wDNTAf7Uqg2fc2eh8sFtqU/bju+a5cCSRXXGKNtR6zP/uj8F5AEGQhFKZN508c4aVb3wHtF2MphFG0h5QhYCvCeK8m+XKbbjcaYm5mJPFc3aNO0CGPNlTzHOO8WrCff6nuJZ28Fquh/CgRnVZvy46/l7hrZn9Lp/nQ+2o7Ndf72ZXjLJ2A5HBeEcJTPYfnw/3eU60naAif6l7gY8yC6O6jPoKftAZJDimDEyb3B/Su5EeeKP5sB20N2jgOPfSOoyijovDRt2QKnLQqB6qxaxfXn+sjx/WZ6/LM9flucvy/OX5fnL8vxlef6yPH9Znr8sz1+W5y/L85f/M3/5BZ+/aGtuVoTFAAAAAElFTkSuQmCC"></image>
+		</pattern>
+        <linearGradient id="gradient-footer-large" gradientUnits="userSpaceOnUse" x1="264.9866" y1="333.6309" x2="341.8304" y2="518.0563">
+			<stop offset="0" stop-color="#27CCC1"/>
+			<stop offset="1" stop-color="#1A77D1"/>
+		</linearGradient>
+        <linearGradient id="gradient-footer-medium" gradientUnits="userSpaceOnUse" x1="67.7938" y1="199.5592" x2="111.7475" y2="339.2899">
+			<stop offset="0" stop-color="#2EC9D7"/>
+			<stop offset="1" stop-color="#1670C2"/>
+		</linearGradient>
+		<linearGradient id="gradient-footer-small" gradientUnits="userSpaceOnUse" x1="205.3203" y1="-3.4952" x2="214.7691" y2="77.1841">
+			<stop offset="0" stop-color="#27E7CB"/>
+			<stop offset="1" stop-color="#1DAFE4"/>
+		</linearGradient>
+	</defs>
+	<g>
+		<polygon class="hexagon-footer-general hexagon-footer-large" points="192,364.4 192,494.9 305,560.1 418,494.9 418,364.4 305,299.2"/>
+		<polygon class="hexagon-footer-overlay" points="192,364.4 192,494.9 305,560.1 418,494.9 418,364.4 305,299.2"/>
+	</g>
+	<g>
+		<polygon class="hexagon-footer-general hexagon-footer-medium" points="0,213 0,314.6 88,365.4 176,314.6 176,213 88,162.2"/>
+		<polygon class="hexagon-footer-overlay" points="0,213 0,314.6 88,365.4 176,314.6 176,213 88,162.2"/>
+	</g>
+	<g>
+		<polygon class="hexagon-footer-general hexagon-footer-small" points="166,26.5 166,79.6 211.9,106.1 257.9,79.6 257.9,26.5 211.9,0"/>
+		<polygon class="hexagon-footer-overlay" points="166,26.5 166,79.6 211.9,106.1 257.9,79.6 257.9,26.5 211.9,0"/>
+	</g>
+</svg>
+
+    <div class="footer__award">
+        <span class="footer__award_text script">Winner - Best individual 2017</span>
+        <a class="img-link" href="https://www.informationisbeautifulawards.com/">
+            <img src="https://d33wubrfki0l68.cloudfront.net/9289ec36a7012e0ca8b99a3eae3faa7eb71458d4/8937b/img/site/information_is_beautiful_awards_logo.png">
+        </a>
+        <span class="footer__award_text script">Information is Beautiful Awards</span>
+    </div>
+
+    <h2>If you’re looking for uniquely crafted & beautiful visualizations of data — let’s get in touch!</h2>
+    <p class="footer__email script">
+        <a href="mailto:info@visualcinnamon.com">info@VisualCinnamon.com</a>
+    </p>
+
+    <div class="footer__social">
+        <p class="script">
+            <span>there's also a newsletter!</span>
+            <svg id="curved_line" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                x="0px" y="0px" viewBox="0 0 7.9 28.5" xml:space="preserve">
+                <path style="fill: none; stroke: white; stroke-width: 0.035em; stroke-linecap: round;" d="M0.7,8c7.7,2.3,7.2,13.9,2.6,19.7"
+                />
+            </svg>
+        </p>
+        <ul class=share__list>
+    <li>
+        <a class="share__button" title="Follow me on Twitter" href="https://twitter.com/NadiehBremer"><svg xmlns="http://www.w3.org/2000/svg" id="twitter-circle-icon" class="twitter circle icon" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 96 96" style="enable-background:new 0 0 96 96;" xml:space="preserve">
+    <g>
+        <path d="M48,0C21.488,0,0,21.49,0,48c0,26.511,21.488,48,48,48c26.51,0,48-21.489,48-48   C96,21.49,74.51,0,48,0z M67.521,39.322c0.02,0.406,0.027,0.814,0.027,1.224c0,12.493-9.51,26.899-26.898,26.899   c-5.338,0-10.307-1.566-14.49-4.249c0.738,0.089,1.49,0.133,2.254,0.133c4.43,0,8.506-1.511,11.742-4.048   c-4.137-0.075-7.629-2.809-8.832-6.564c0.578,0.109,1.17,0.17,1.779,0.17c0.861,0,1.697-0.116,2.49-0.332   c-4.324-0.869-7.584-4.689-7.584-9.271c0-0.04,0-0.079,0.002-0.118c1.273,0.708,2.732,1.133,4.281,1.183   c-2.537-1.696-4.205-4.589-4.205-7.87c0-1.732,0.465-3.355,1.279-4.752c4.662,5.72,11.629,9.483,19.486,9.878   c-0.162-0.692-0.244-1.414-0.244-2.155c0-5.221,4.232-9.453,9.453-9.453c2.719,0,5.176,1.148,6.9,2.985   c2.154-0.424,4.178-1.21,6.004-2.294c-0.707,2.207-2.205,4.061-4.156,5.23c1.912-0.229,3.734-0.736,5.43-1.488   C70.973,36.324,69.369,37.99,67.521,39.322z" />
+    </g>
+</svg></a>
+    </li>
+    <li>
+        <a class="share__button" title="Follow me on Instagram" href="https://instagram.com/NadiehBremer"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="instagram-circle-icon" class="instagram circle icon" x="0px" y="0px" viewBox="0 0 96 96" style="enable-background:new 0 0 96 96;" xml:space="preserve">
+<g>
+	<path d="M67.8,33c-0.4-1.1-1.1-2.1-1.9-2.9c-0.8-0.8-1.8-1.5-2.9-1.9c-1.5-0.6-3.1-0.9-4.7-0.9c-2.7-0.1-3.5-0.1-10.3-0.1
+		s-7.6,0-10.3,0.1c-1.6,0-3.2,0.3-4.7,0.9c-1.1,0.4-2.1,1.1-2.9,1.9c-0.8,0.8-1.5,1.8-1.9,2.9c-0.6,1.5-0.9,3.1-0.9,4.7
+		c-0.1,2.7-0.1,3.5-0.1,10.3s0,7.6,0.1,10.3c0,1.6,0.3,3.2,0.9,4.7c0.8,2.2,2.6,3.9,4.8,4.8c1.5,0.6,3.1,0.9,4.7,0.9
+		c2.7,0.1,3.5,0.1,10.3,0.1s7.6,0,10.3-0.1c1.6,0,3.2-0.3,4.7-0.9c2.2-0.8,3.9-2.6,4.8-4.8c0.6-1.5,0.9-3.1,0.9-4.7
+		c0.1-2.7,0.1-3.5,0.1-10.3s0-7.6-0.1-10.3C68.7,36.1,68.4,34.5,67.8,33z M48.1,61.1c-7.3,0-13.1-5.8-13.1-13C35,40.8,40.8,35,48,35
+		s13.1,5.8,13.1,13.1C61.1,55.3,55.3,61.1,48.1,61.1z M61.6,37.4c-1.6,0-3-1.4-3-3c0-1.6,1.4-3,3-3c1.6,0,3,1.4,3,3
+		C64.6,36.1,63.2,37.4,61.6,37.4z"/>
+	<path d="M48,0C21.5,0,0,21.5,0,48s21.5,48,48,48s48-21.5,48-48S74.5,0,48,0z M73.3,58.7c-0.1,2.1-0.5,4.2-1.2,6.2
+		c-1.3,3.4-4,6.1-7.4,7.4c-2,0.8-4.1,1.2-6.2,1.2c-2.7,0.1-3.6,0.1-10.5,0.1s-7.8-0.1-10.5-0.2c-2.1-0.1-4.2-0.5-6.2-1.2
+		c-3.4-1.3-6.1-4-7.4-7.4c-0.8-2-1.2-4.1-1.2-6.2c-0.2-2.7-0.2-3.6-0.2-10.5c0-6.9,0.1-7.8,0.2-10.5c0.1-2.1,0.5-4.2,1.2-6.2
+		c1.3-3.4,4-6.1,7.4-7.4c2-0.8,4.1-1.2,6.2-1.2c2.7-0.2,3.6-0.2,10.5-0.2s7.8,0,10.5,0.3c2.1,0.1,4.2,0.5,6.2,1.2
+		c3.4,1.3,6.1,4,7.4,7.4c0.8,2,1.2,4.1,1.2,6.2c0.2,2.7,0.2,3.6,0.2,10.5C73.5,55.1,73.4,56,73.3,58.7z"/>
+	<circle cx="48" cy="48" r="8.5"/>
+</g>
+</svg>
+</a>
+    </li>
+    <li>
+        <a class="share__button" title="Follow me on Behance" href="https://www.behance.net/NadiehBremer"><svg xmlns="http://www.w3.org/2000/svg" id="behance-circle-icon" class="behance circle icon" width="24" height="24" viewBox="0 0 24 24">
+    <g>
+        <path d="M8.84 10.835h-1.965v-1.859h1.783c1.878 0 1.646 1.859.182 1.859zm5.789 1.058h2.624c-.115-1.687-2.36-1.81-2.624 0zm-5.9.396h-1.854v1.947h1.824c1.782-.001 1.673-1.947.03-1.947zm15.271-.289c0 6.627-5.373 12-12 12s-12-5.373-12-12 5.373-12 12-12 12 5.373 12 12zm-13.357-.733c1.668-.853 1.607-3.981-1.587-4.028h-4.056v8.73h3.771c3.958 0 3.891-3.967 1.872-4.702zm3.357-3.166h4v-.875h-4v.875zm4.943 3.693c-.545-3.505-6.053-3.711-6.053.872 0 4.526 5.18 3.818 5.949 1.56h-1.848c-.645.748-2.508.531-2.404-1.184h4.41c.009-.555-.009-.953-.054-1.248z"/>
+    </g>
+</svg></a>
+    </li>
+    <li>
+        <a class="share__button" title="Follow me on LinkedIn" href="https://www.linkedin.com/in/nbremer/"><svg xmlns="http://www.w3.org/2000/svg" id="linkedin-circle-icon" class="linkedin circle icon" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve">
+<path d="M46.8,44.1V32.4c0-6.3-3.3-9.2-7.8-9.2c-3.6,0-5.2,2-6.1,3.4v-2.9h-6.8c0.1,1.9,0,20.4,0,20.4h6.8V32.7c0-0.6,0-1.2,0.2-1.7
+	c0.5-1.2,1.6-2.5,3.5-2.5c2.5,0,3.4,1.9,3.4,4.6v10.9L46.8,44.1L46.8,44.1z M19,20.9c2.4,0,3.8-1.6,3.8-3.5c0-2-1.5-3.5-3.8-3.5
+	s-3.8,1.5-3.8,3.5C15.2,19.4,16.6,20.9,19,20.9L19,20.9z M30,60C13.4,60,0,46.6,0,30C0,13.4,13.4,0,30,0s30,13.4,30,30
+	C60,46.6,46.6,60,30,60z M22.4,44.1V23.7h-6.8v20.4H22.4z"/>
+</svg>
+</a>
+    </li>
+    <li>
+        <a class="share__button" title="Subscribe to my newsletter" href="http://eepurl.com/bBkZAz"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="email circle icon" version="1.1" id="email-circle-icon" x="0px" y="0px" viewBox="0 0 612 612" style="enable-background:new 0 0 612 612;" xml:space="preserve">
+    <g>
+        <g>
+            <path d="M306,612c-28.152,0-55.284-3.672-81.396-11.016c-26.112-7.347-50.49-17.646-73.134-30.906    s-43.248-29.172-61.812-47.736c-18.564-18.562-34.476-39.168-47.736-61.812c-13.26-22.646-23.562-47.022-30.906-73.135    C3.672,361.284,0,334.152,0,306s3.672-55.284,11.016-81.396s17.646-50.49,30.906-73.134s29.172-43.248,47.736-61.812    s39.168-34.476,61.812-47.736s47.022-23.562,73.134-30.906S277.848,0,306,0c42.024,0,81.702,8.058,119.034,24.174    s69.768,37.944,97.308,65.484s49.368,59.976,65.484,97.308S612,263.976,612,306c0,28.152-3.672,55.284-11.016,81.396    c-7.347,26.109-17.646,50.487-30.906,73.134c-13.26,22.644-29.172,43.248-47.736,61.812    c-18.562,18.564-39.168,34.479-61.812,47.736c-22.646,13.26-47.022,23.562-73.136,30.906C361.284,608.328,334.152,612,306,612z     M453.492,179.928H163.404c-2.856,0-5.304,0.918-7.344,2.754s-3.06,4.386-3.06,7.65v32.436c0,1.632,0.612,2.448,1.836,2.448    l152.388,86.904l1.227,0.612c0.813,0,1.428-0.204,1.836-0.612l147.492-86.904c0.813-0.408,1.428-0.612,1.836-0.612    c0.405,0,1.02-0.204,1.836-0.612c1.632,0,2.448-0.816,2.448-2.448v-31.212c0-3.264-1.021-5.814-3.063-7.65    S456.348,179.928,453.492,179.928z M245.412,310.284c0.408-0.408,0.612-1.021,0.612-1.836c0-1.227-0.408-1.836-1.224-1.836    l-87.516-50.185c-1.224-0.408-2.244-0.408-3.06,0c-0.816,0-1.224,0.612-1.224,1.836v131.58c0,1.227,0.612,2.04,1.836,2.448h1.224    c0.816,0,1.224-0.204,1.224-0.612L245.412,310.284z M351.9,320.076c-0.408-1.227-1.431-1.428-3.063-0.612l-33.66,19.584    c-4.08,2.448-8.361,2.448-12.852,0l-29.376-16.521c-1.224-0.816-2.244-0.816-3.06,0l-111.996,104.04    c-0.408,0.405-0.612,1.224-0.612,2.445c0,0.408,0.408,1.021,1.224,1.836c2.448,0.816,4.08,1.227,4.896,1.227H450.43    c0.816,0,1.635-0.408,2.448-1.227c0-1.632-0.204-2.649-0.612-3.06L351.9,320.076z M462.06,253.98h-2.445l-83.232,49.572    c-0.813,0-1.224,0.612-1.224,1.836c-0.408,0.408-0.204,1.02,0.609,1.833L459,397.188c0.816,0.816,1.428,1.227,1.836,1.227h1.224    c1.227-1.227,1.839-2.04,1.839-2.448V256.429C463.896,255.612,463.284,254.796,462.06,253.98z" />
+        </g>
+    </g>
+</svg></a>
+    </li>
+</ul>
+    </div>
+
+    <div class="footer__copyright">
+        <p class="footer__copyright_start">I built this page using
+            <a href="https://github.com/netlify/victor-hugo">Victor</a>
+            <a href="https://gohugo.io/">Hugo</a> — It's hosted on
+            <a href="https://netlify.com/">Netlify</a>
+        </p>
+        <p class="footer__copyright_middle">© 2018 – 2019 Copyright Visual Cinnamon — All rights reserved</p>
+        <p class="footer__copyright_end"><a href='/privacy-statement'>Privacy Statement</a></p>
+    </div>
+</footer>
+</body>
+
+</html>
